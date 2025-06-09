@@ -18,31 +18,56 @@ docker exec -it hadoop-node-1 bash
 start-dfs.sh && start-yarn.sh
 ```
 
-Navigate to localhost:9870 for the Hadoop NameNode UI and localhost:8088 for the ResourceManager UI.
+> Navigate to localhost:9870 for the Hadoop NameNode UI and localhost:8088 for the ResourceManager UI.
 
-### Word Count (Java)
-
-#### 1. Compile the Java program
+### Java Program Compilation
 ```bash
 javac -classpath "$HADOOP_HOME/share/hadoop/common/hadoop-common-3.4.0.jar:$HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-client-core-3.4.0.jar" -d . WordCount.java
 jar -cvf wordcount.jar scripts/*.class
 ```
 
-#### 2. Prepare input and run the job
+### Running Word Count Example using NOW Corpus
 ```bash
+# Copy the NOW corpus text files into the container
 hadoop fs -mkdir -p /input-now && hadoop fs -put input-now/* /input-now/
-hadoop jar wordcount.jar scripts.WordCount /input-now /output-word-count
-```
 
-### Output
-```bash
-# Show the output
+# Run the word count job on the NOW corpus
+hadoop jar wordcount.jar scripts.WordCount /input-now /output-word-count
+
+# View the output
 hadoop fs -cat /output-word-count/part-r-00000
 
-# or copy the output to local
+# or copy the output to container's local filesystem
 hadoop fs -copyToLocal /output-word-count/part-r-00000 /home/hadoop/output/word_count.txt
+```
 
-# then, in local terminal
+### Using Your Own Text File
+
+In local machine terminal:
+```bash
+# Copy the text file from local machine into the container
+docker cp <path-to-your-text-file> hadoop-node-1:/home/hadoop/dataset.txt
+```
+
+In the container terminal:
+```bash
+# In the container, upload your file to HDFS
+hadoop fs -mkdir -p /input-custom && hadoop fs -put dataset.txt /input-custom/
+
+# Run the word count job on your file
+hadoop jar wordcount.jar scripts.WordCount /input-custom /output-custom-word-count
+
+# View the output
+hadoop fs -cat /output-custom-word-count/part-r-00000
+
+# or copy the output to container's local filesystem
+hadoop fs -copyToLocal /output-custom-word-count/part-r-00000 /home/hadoop/output/my_word_count.txt
+```
+
+### Copy Output to Local Machine
+In the local machine terminal:
+```bash
+# Copy the output from the container to your local machine
 docker cp hadoop-node-1:/home/hadoop/output .
 ```
 
