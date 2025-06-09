@@ -1,0 +1,29 @@
+x-hadoop-node: &hadoop-node
+  image: ynshung/hadoop-wordcount:latest
+  networks:
+    - hadoop
+  user: hadoop
+  stdin_open: true
+
+services:
+  hadoop-node-1:
+    <<: *hadoop-node
+    container_name: hadoop-node-1
+    hostname: hadoop-node-1
+    ports:
+      - "9870:9870"   # HDFS NameNode UI
+      - "8088:8088"   # YARN ResourceManager UI
+
+  hadoop-node-2:
+    <<: *hadoop-node
+    container_name: hadoop-node-2
+    hostname: hadoop-node-2
+  
+  hadoop-node-3:
+    <<: *hadoop-node
+    container_name: hadoop-node-3
+    hostname: hadoop-node-3
+
+networks:
+  hadoop:
+    driver: bridge
